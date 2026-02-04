@@ -5,7 +5,6 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const cors = require("cors");
-const serverless = require("serverless-http");
 const path = require("path");
 
 const authRoute = require("../routes/authRoute");
@@ -37,9 +36,10 @@ app.use(
 
 app.use("/upload", uploadRoute);
 
-// ✅ health check (CRITICAL)
+// ✅ health check
 app.get("/", (req, res) => {
-  res.json({ status: "API running on Vercel" });
+  res.json({ status: "API running" });
 });
 
-module.exports = serverless(app);
+// ✅ IMPORTANT: export app directly
+module.exports = app;
