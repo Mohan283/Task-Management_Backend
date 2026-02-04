@@ -4,11 +4,13 @@ const express = require('express');
 const app = express();
 const { default: mongoose } = require('mongoose');
 const cors= require('cors')
-const authRoute = require('./routes/authRoute')
-const taskRoute = require('./routes/taskRoute')
-const userRoute= require('./routes/userRoute')
-const uploadRoute= require('./routes/uploadRoute')
+const authRoute = require('../routes/authRoute')
+const taskRoute = require('../routes/taskRoute')
+const userRoute= require('../routes/userRoute')
+const uploadRoute= require('../routes/uploadRoute')
 const session =require("express-session") ;
+const serverless = require('serverless-http')
+const path = require("path");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -52,7 +54,11 @@ app.use('/task', taskRoute)
 app.use('/user', userRoute)
 
 // Serve uploaded images
-app.use("/uploads", express.static("uploads"));
+// static uploads
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "../uploads"))
+);
 
 // Connect image routes
 app.use("/upload", uploadRoute);
@@ -60,3 +66,4 @@ app.use("/upload", uploadRoute);
 
 
 module.exports = app;
+module.exports.handler = serverless(app)
