@@ -1,69 +1,45 @@
-const dotenv = require('dotenv')
-dotenv.config()
-const express = require('express');
+const dotenv = require("dotenv");
+dotenv.config();
+
+const express = require("express");
 const app = express();
-const { default: mongoose } = require('mongoose');
-const cors= require('cors')
-const authRoute = require('../routes/authRoute')
-const taskRoute = require('../routes/taskRoute')
-const userRoute= require('../routes/userRoute')
-const uploadRoute= require('../routes/uploadRoute')
-const session =require("express-session") ;
-const serverless = require('serverless-http')
+const mongoose = require("mongoose");
+const cors = require("cors");
+const serverless = require("serverless-http");
 const path = require("path");
+
+const authRoute = require("../routes/authRoute");
+const taskRoute = require("../routes/taskRoute");
+const userRoute = require("../routes/userRoute");
+const uploadRoute = require("../routes/uploadRoute");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-app.use(
-  session({
-    name: "admin.sid",
-    secret: "adminSecretKey",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: false, // true only in HTTPS
-      sameSite: "lax"
-    }
-  })
-);
-PORT = process.env.PORT;
-MONGO= process.env.MONGO_DB;
+mongoose.connect(process.env.MONGO_DB)
+  .then(() => console.log("DB connected"))
+  .catch(err => console.error("DB error:", err));
 
-mongoose.connect(MONGO)
-.then(()=>
-{
-    console.log("Database is connected successfully");
-    
-})
-.catch((err)=>
-{
-    console.error("Connection error", err);
-    
-})
+app.use("/auth", authRoute);
+app.use("/task", taskRoute);
+app.use("/user", userRoute);
 
-app.use('/auth', authRoute)
-app.use('/task', taskRoute)
-app.use('/user', userRoute)
-
-// Serve uploaded images
-// static uploads
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "../uploads"))
 );
 
-// Connect image routes
 app.use("/upload", uploadRoute);
 
+// ✅ health check (CRITICAL)
+app.get("/", (req, res) => {
+  res.json({ status: "API running on Vercel" });
+});
 
-
-module.exports = app;
-module.exports.handler = serverless(app)
+module.exports = serverless(app);
