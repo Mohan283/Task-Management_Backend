@@ -20,25 +20,10 @@ app.use(express.urlencoded({ extended: true }));
 // -----------------------
 // CORS setup
 // -----------------------
-const allowedOrigins = [
-  "http://localhost:5173", // React dev server
-  "https://task-management-frontend-ten-omega.vercel.app" // Vercel frontend
-];
-
 app.use(cors({
-  origin: function(origin, callback) {
-    // allow requests with no origin like Postman
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 // -----------------------
