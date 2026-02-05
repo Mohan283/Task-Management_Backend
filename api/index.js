@@ -2,7 +2,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const express = require("express");
-const app = express();
 const cors = require("cors");
 const path = require("path");
 
@@ -13,6 +12,8 @@ const taskRoute = require("../routes/taskRoute");
 const userRoute = require("../routes/userRoute");
 const uploadRoute = require("../routes/uploadRoute");
 
+const app = express();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -22,9 +23,25 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-connectDB()
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.error("❌ MongoDB error:", err));
+// 🔥 IMPORTANT: wrap routes after DB connection
+let isConnected = false;
+
+async function init() {
+  if (!isConnected) {
+    await connectDB(); // ✅ WAIT here
+    isConnected = true;
+  }
+}
+
+app.use(async (req, res, next) => {
+  try {
+    await init();      // ✅ ensures DB is ready
+    next();
+  } catch (err) {
+    console.error("DB init error:", err);
+    res.status(500).json({ message: "Database connection failed" });
+  }
+});
 
 app.use("/auth", authRoute);
 app.use("/task", taskRoute);
@@ -37,10 +54,8 @@ app.use(
 
 app.use("/upload", uploadRoute);
 
-// ✅ health check
 app.get("/", (req, res) => {
   res.json({ status: "API running" });
 });
 
-// ✅ IMPORTANT: export app directly
 module.exports = app;
