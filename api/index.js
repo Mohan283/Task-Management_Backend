@@ -3,9 +3,10 @@ dotenv.config();
 
 const express = require("express");
 const app = express();
-const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
+
+const connectDB = require("../config/db");
 
 const authRoute = require("../routes/authRoute");
 const taskRoute = require("../routes/taskRoute");
@@ -21,9 +22,9 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-mongoose.connect(process.env.MONGO_DB)
-  .then(() => console.log("DB connected"))
-  .catch(err => console.error("DB error:", err));
+connectDB()
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch(err => console.error("❌ MongoDB error:", err));
 
 app.use("/auth", authRoute);
 app.use("/task", taskRoute);
