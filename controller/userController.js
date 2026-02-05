@@ -33,7 +33,7 @@ const registerUser = async(req, res)=>
           // Build profile image URL
         let profileImageUrl = null;
             if (req.file) {
-            profileImageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
+            profileImageUrl = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
             }
 
         const user = await User.create({

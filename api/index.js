@@ -17,25 +17,44 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// -----------------------
+// CORS setup
+// -----------------------
+const allowedOrigins = [
+  "http://localhost:5173", // React dev server
+  "https://task-management-frontend-ten-omega.vercel.app" // Vercel frontend
+];
+
 app.use(cors({
-  origin: "https://task-management-frontend-ten-omega.vercel.app/",
+  origin: function(origin, callback) {
+    // allow requests with no origin like Postman
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 }));
 
-// 🔥 IMPORTANT: wrap routes after DB connection
+// -----------------------
+// DB connection
+// -----------------------
 let isConnected = false;
-
 async function init() {
   if (!isConnected) {
-    await connectDB(); // ✅ WAIT here
+    await connectDB();
     isConnected = true;
   }
 }
 
 app.use(async (req, res, next) => {
   try {
-    await init();      // ✅ ensures DB is ready
+    await init();
     next();
   } catch (err) {
     console.error("DB init error:", err);
@@ -43,15 +62,14 @@ app.use(async (req, res, next) => {
   }
 });
 
+// -----------------------
+// Routes
+// -----------------------
 app.use("/auth", authRoute);
 app.use("/task", taskRoute);
 app.use("/user", userRoute);
 
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "../uploads"))
-);
-
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/upload", uploadRoute);
 
 app.get("/", (req, res) => {
