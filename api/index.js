@@ -20,11 +20,52 @@ app.use(express.urlencoded({ extended: true }));
 // -----------------------
 // CORS setup
 // -----------------------
+
+app.use((req, res, next) => {
+  res.header(
+    "Access-Control-Allow-Origin",
+    "https://task-management-frontend-ten-omega.vercel.app"
+  );
+  res.header(
+    "Access-Control-Allow-Credentials",
+    "true"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://task-management-frontend-ten-omega.vercel.app" // no trailing slash
+];
+
 app.use(cors({
-  origin: "*",
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 }));
+
 
 // -----------------------
 // DB connection
