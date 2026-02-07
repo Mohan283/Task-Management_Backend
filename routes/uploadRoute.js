@@ -6,7 +6,7 @@ const { uploadFile } = require("../controller/uploadController");
 // 🔹 SINGLE upload (profile image)
 router.post(
   "/single",
-  upload.single("profileImage"),
+  upload.single("image"),
   uploadFile
 );
 
