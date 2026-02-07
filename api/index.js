@@ -3,7 +3,6 @@ dotenv.config();
 
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 
 const connectDB = require("../config/db");
 
@@ -14,65 +13,36 @@ const uploadRoute = require("../routes/uploadRoute");
 
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// -----------------------
-// CORS setup
-// -----------------------
-
-
-
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://task-management-frontend-ten-omega.vercel.app" // no trailing slash
-];
-
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  origin: [
+    "http://localhost:5173",
+    "https://task-management-frontend-ten-omega.vercel.app"
+  ],
   credentials: true
 }));
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// -----------------------
-// DB connection
-// -----------------------
+// DB connection (cached)
 let isConnected = false;
-async function init() {
-  if (!isConnected) {
-    await connectDB();
-    isConnected = true;
-  }
-}
-
 app.use(async (req, res, next) => {
   try {
-    await init();
+    if (!isConnected) {
+      await connectDB();
+      isConnected = true;
+    }
     next();
   } catch (err) {
-    console.error("DB init error:", err);
+    console.error("DB error:", err);
     res.status(500).json({ message: "Database connection failed" });
   }
 });
 
-// -----------------------
 // Routes
-// -----------------------
 app.use("/auth", authRoute);
 app.use("/task", taskRoute);
 app.use("/user", userRoute);
-
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/upload", uploadRoute);
 
 app.get("/", (req, res) => {
