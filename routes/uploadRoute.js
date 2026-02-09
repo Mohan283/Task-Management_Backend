@@ -1,20 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middleware/upload");
-const { uploadFile } = require("../controller/uploadController");
+const {
+  uploadProfileImage,
+  uploadTaskAttachments,
+} = require("../controller/uploadController");
 
-// 🔹 SINGLE upload (profile image)
-router.post(
-  "/single",
-  upload.single("image"),
-  uploadFile
-);
+// ---------------- PROFILE IMAGE ----------------
+router.post("/upload-profile", uploadProfileImage);
 
-// 🔹 MULTIPLE upload (attachments)
-router.post(
-  "/multiple",
-  upload.array("files", 10),
-  uploadFile
-);
+// ---------------- TASK ATTACHMENTS ----------------
+router.post("/create-task", uploadTaskAttachments);
 
 module.exports = router;
