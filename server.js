@@ -13,14 +13,16 @@ const uploadRoute = require("./routes/uploadRoute");
 
 const app = express();
 
-// CORS
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://task-management-frontend-eight-ruby.vercel.app"
-  ],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "https://task-management-frontend-eight-ruby.vercel.app",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+app.options("*", cors());
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
