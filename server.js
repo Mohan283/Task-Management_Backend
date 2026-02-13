@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 
 const connectDB = require("./config/db");
+const session = require("express-session");
 
 const authRoute = require("./routes/authRoute");
 const taskRoute = require("./routes/taskRoute");
@@ -24,6 +25,20 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(session({
+  secret: process.env.SESSION_SECRET || "mysupersecretkey",
+  resave: false,
+  saveUninitialized: false,
+  proxy: true,   // IMPORTANT for Render
+  cookie: {
+    secure: false,   // Render free plan uses HTTP internally
+    httpOnly: true,
+    sameSite: "lax"
+  }
+}));
+
+
+app.set("trust proxy", 1);
 
 // DB (cached)
 let isConnected = false;
