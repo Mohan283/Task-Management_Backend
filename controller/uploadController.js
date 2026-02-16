@@ -78,20 +78,24 @@ const uploadTaskAttachments = (req, res) => {
         );
       } else {
         attachments = req.files.map((file) => {
-          const filePath = path.join(
-            __dirname,
-            "../uploads",
-            file.originalname
-          );
+  const uniqueName = Date.now() + "-" + file.originalname;
 
-          fs.writeFileSync(filePath, file.buffer);
+  const filePath = path.join(
+    __dirname,
+    "../uploads",
+    uniqueName
+  );
 
-          return {
-            originalName: file.originalname,
-            fileType: file.mimetype,
-            filePath: `/uploads/${file.originalname}`,
-          };
-        });
+  fs.writeFileSync(filePath, file.buffer);
+
+  return {
+    originalName: file.originalname,
+    fileName: uniqueName,
+    fileType: file.mimetype,
+    filePath: `/uploads/${uniqueName}`,
+  };
+});
+
       }
 
       const task = await taskRegister(req.body, attachments, req.params.id);
