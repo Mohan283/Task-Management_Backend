@@ -29,8 +29,6 @@ const taskRegister = async (body, attachments) => {
 };
 
 
-
-
 const getTask = async (req, res) => {
   try {
     const tasks = await Task.find()
