@@ -1,45 +1,33 @@
 const Task = require('../model/taskModel')
 
 
-const taskRegister = async (req, res) => {
+const taskRegister = async (body, attachments) => {
   try {
-    const attachments = req.files
-      ? req.files.map((file) => ({
-          originalName: file.originalname,
-          fileName: file.filename,
-          filePath: `/uploads/${file.filename}`,
-          fileType: file.mimetype,
-        }))
-      : [];
-
-    const assignedUsers = req.body.assignedTo
-      ? [req.body.assignedTo]
+    const assignedUsers = body.assignedTo
+      ? Array.isArray(body.assignedTo)
+        ? body.assignedTo
+        : [body.assignedTo]
       : [];
 
     const newTask = new Task({
-      title: req.body.title,
-      description: req.body.description,
-      priority: req.body.priority,
-      date: req.body.date,
-      dueDate: req.body.dueDate,
+      title: body.title,
+      description: body.description,
+      priority: body.priority,
+      date: body.date,
+      dueDate: body.dueDate,
       assignedTo: assignedUsers,
-      attachments, // ✅ proper structure
+      attachments: attachments || [],  // ✅ use attachments from upload controller
     });
 
     const savedData = await newTask.save();
 
-    return res.status(201).json({
-      message: "Task Created Successfully",
-      data: savedData,
-    });
+    return savedData;
+
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "Error saving task",
-      error: error.message,
-    });
+    throw new Error(error.message);
   }
 };
+
 
 
 
