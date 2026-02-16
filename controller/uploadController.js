@@ -53,10 +53,10 @@ const uploadTaskAttachments = (req, res) => {
       return res.status(400).json({ message: "No files uploaded" });
 
     try {
-      let attachmentUrls = [];
+      let attachments = [];
 
       if (USE_CLOUD) {
-        attachmentUrls = await Promise.all(
+        attachments = await Promise.all(
           req.files.map(
             (file) =>
               new Promise((resolve, reject) => {
@@ -64,7 +64,12 @@ const uploadTaskAttachments = (req, res) => {
                   { folder: "task-attachments" },
                   (err, result) => {
                     if (err) reject(err);
-                    else resolve(result.secure_url);
+                    else
+                      resolve({
+                        originalName: file.originalname,
+                        fileType: file.mimetype,
+                        filePath: result.secure_url,
+                      });
                   }
                 );
                 stream.end(file.buffer);
@@ -72,21 +77,35 @@ const uploadTaskAttachments = (req, res) => {
           )
         );
       } else {
-        attachmentUrls = req.files.map((file) => {
-          const filePath = path.join(__dirname, "../uploads", file.originalname);
+        attachments = req.files.map((file) => {
+          const filePath = path.join(
+            __dirname,
+            "../uploads",
+            file.originalname
+          );
+
           fs.writeFileSync(filePath, file.buffer);
-          return `/uploads/${file.originalname}`;
+
+          return {
+            originalName: file.originalname,
+            fileType: file.mimetype,
+            filePath: `/uploads/${file.originalname}`,
+          };
         });
       }
 
-      // Call task controller (DB)
-      const task = await taskRegister(req.body, attachmentUrls, req.params.id); // adjust for update if needed
+      const task = await taskRegister(req.body, attachments, req.params.id);
+
       res.status(201).json(task);
     } catch (err) {
-      res.status(500).json({ message: "Task creation failed", error: err.message });
+      res.status(500).json({
+        message: "Task creation failed",
+        error: err.message,
+      });
     }
   });
 };
+
 
 module.exports = {
   uploadProfileImage,
