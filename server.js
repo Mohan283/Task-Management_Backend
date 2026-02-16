@@ -11,6 +11,7 @@ const authRoute = require("./routes/authRoute");
 const taskRoute = require("./routes/taskRoute");
 const userRoute = require("./routes/userRoute");
 const uploadRoute = require("./routes/uploadRoute");
+const path = require('path')
 
 const app = express();
 
