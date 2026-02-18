@@ -20,7 +20,7 @@ const taskRegisterService = async (body, attachments) => {
       description: body.description,
       priority: body.priority,
       date: body.date,
-      dueDate: body.dueDate,
+     dueDate: new Date(body.dueDate),
       assignedTo: assignedUsers,
       attachments: formattedAttachments,
     });
