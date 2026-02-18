@@ -9,6 +9,16 @@ const taskRegister = async (body, attachments) => {
         : [body.assignedTo]
       : [];
 
+    // ✅ Convert multer files to schema format
+    const formattedAttachments = attachments
+      ? attachments.map((file) => ({
+          originalName: file.originalname,
+          fileName: file.filename,
+          filePath: file.path,
+          fileType: file.mimetype,
+        }))
+      : [];
+
     const newTask = new Task({
       title: body.title,
       description: body.description,
@@ -16,7 +26,7 @@ const taskRegister = async (body, attachments) => {
       date: body.date,
       dueDate: body.dueDate,
       assignedTo: assignedUsers,
-      attachments: attachments || [],  // ✅ use attachments from upload controller
+      attachments: formattedAttachments,  // ✅ correct format
     });
 
     const savedData = await newTask.save();
@@ -27,6 +37,7 @@ const taskRegister = async (body, attachments) => {
     throw new Error(error.message);
   }
 };
+
 
 
 const getTask = async (req, res) => {
