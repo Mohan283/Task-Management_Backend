@@ -71,12 +71,14 @@ const updateTask = async (req, res) => {
   try {
     const { title, description, priority, date, dueDate, assignedTo } = req.body;
 
-    const formattedAttachments = req.files?.map((file) => ({
-      originalName: file.originalname,
-      fileName: file.filename,
-      filePath: file.path,
-      fileType: file.mimetype,
-    })) || [];
+    const formattedAttachments = req.files
+      ? req.files.map((file) => ({
+          originalName: file.originalname,
+          fileName: file.filename,
+          filePath: file.path,
+          fileType: file.mimetype,
+        }))
+      : [];
 
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
@@ -84,7 +86,7 @@ const updateTask = async (req, res) => {
         title,
         description,
         priority,
-        date: new Date(date),
+        date,
         dueDate: new Date(dueDate),
         assignedTo: assignedTo ? [assignedTo] : [],
         ...(formattedAttachments.length > 0 && { attachments: formattedAttachments }),
