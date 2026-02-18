@@ -1,40 +1,22 @@
 const Task = require('../model/taskModel')
+const {taskRegisterService } = require('../service/taskService')
 
 
-const taskRegister = async (body, attachments) => {
+const taskRegister = async (req, res) => {
   try {
-    const assignedUsers = body.assignedTo
-      ? Array.isArray(body.assignedTo)
-        ? body.assignedTo
-        : [body.assignedTo]
-      : [];
+    const savedTask = await taskRegisterService(
+      req.body,
+      req.files   // 👈 IMPORTANT
+    );
 
-    // ✅ Convert multer files to schema format
-    const formattedAttachments = attachments
-      ? attachments.map((file) => ({
-          originalName: file.originalname,
-          fileName: file.filename,
-          filePath: file.path,
-          fileType: file.mimetype,
-        }))
-      : [];
-
-    const newTask = new Task({
-      title: body.title,
-      description: body.description,
-      priority: body.priority,
-      date: body.date,
-      dueDate: body.dueDate,
-      assignedTo: assignedUsers,
-      attachments: formattedAttachments,  // ✅ correct format
+    res.status(201).json({
+      message: "Task created successfully",
+      task: savedTask,
     });
 
-    const savedData = await newTask.save();
-
-    return savedData;
-
   } catch (error) {
-    throw new Error(error.message);
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -92,19 +74,19 @@ const updateTask = async (req, res) => {
       attachments = req.files.map((file) => file.filename);
     }
 
-    const updatedTask = await Task.findByIdAndUpdate(
-      req.params.id,
-      {
-        title,
-        description,
-        priority,
-        date,
-        dueDate,
-        assignedTo: assignedTo ? [assignedTo] : [],
-        ...(attachments.length > 0 && { attachments }),
-      },
-      { new: true }
-    );
+  const updatedTask = await Task.findByIdAndUpdate(
+  req.params.id,
+  {
+    title,
+    description,
+    priority,
+    date,
+    dueDate,
+    assignedTo: assignedTo ? [assignedTo] : [],
+    ...(formattedAttachments.length > 0 && { attachments: formattedAttachments }),
+  },
+  { new: true }
+);
 
     res.status(200).json(updatedTask);
   } catch (error) {

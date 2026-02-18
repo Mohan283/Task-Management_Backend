@@ -20,7 +20,7 @@ const taskSchema = new mongoose.Schema(
       default: "Pending",
     },
     date: {
-      type: String,
+      type: Date,
       required: true,
     },
     dueDate: {
