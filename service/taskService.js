@@ -1,3 +1,4 @@
+const Task = require('../model/taskModel')
 const taskRegisterService = async (body, attachments) => {
   try {
   const assignedUsers =
