@@ -1,10 +1,15 @@
 const taskRegisterService = async (body, attachments) => {
   try {
-    const assignedUsers = body.assignedTo
-      ? Array.isArray(body.assignedTo)
-        ? body.assignedTo
-        : [body.assignedTo]
-      : [];
+  const assignedUsers =
+  body.assignedTo && body.assignedTo !== ""
+    ? Array.isArray(body.assignedTo)
+      ? body.assignedTo
+      : [body.assignedTo]
+    : null;
+
+if (!assignedUsers || assignedUsers.length === 0) {
+  throw new Error("Assigned user is required");
+}
 
     const formattedAttachments = attachments
       ? attachments.map((file) => ({
@@ -19,7 +24,7 @@ const taskRegisterService = async (body, attachments) => {
       title: body.title,
       description: body.description,
       priority: body.priority,
-      date: body.date,
+      date: new Date(body.date),
      dueDate: new Date(body.dueDate),
       assignedTo: assignedUsers,
       attachments: formattedAttachments,
