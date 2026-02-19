@@ -17,12 +17,15 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://task-management-frontend-eight-ruby.vercel.app",
+    origin: [
+      "http://localhost:5173",
+      "https://task.zerotorqcreative.com"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true   // 🔥 ADD THIS
   })
 );
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -37,7 +40,7 @@ app.use(session({
   cookie: {
     secure: false,   // Render free plan uses HTTP internally
     httpOnly: true,
-    sameSite: "lax"
+    sameSite: "none"
   }
 }));
 
