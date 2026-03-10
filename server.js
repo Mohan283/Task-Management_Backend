@@ -15,15 +15,28 @@ const path = require('path')
 
 const app = express();
 
+
+const isProduction = process.env.NODE_ENV === "production";
+/* ---------------- CORS ---------------- */
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://task.zerotorqcreative.com"
+];
+
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://task.zerotorqcreative.com"
-    ],
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true   // 🔥 ADD THIS
+    credentials: true
   })
 );
 
@@ -32,18 +45,21 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || "mysupersecretkey",
-  resave: false,
-  saveUninitialized: false,
-  proxy: true,   // IMPORTANT for Render
-  cookie: {
-    secure: false,   // Render free plan uses HTTP internally
-    httpOnly: true,
-    sameSite: "none"
-  }
-}));
+app.set("trust proxy", 1);
 
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "mysupersecretkey",
+    resave: false,
+    saveUninitialized: false,
+    proxy: true,
+    cookie: {
+      secure: isProduction,                // true in production
+      httpOnly: true,
+      sameSite: isProduction ? "none" : "lax"
+    }
+  })
+);
 
 app.set("trust proxy", 1);
 
